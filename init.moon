@@ -16,6 +16,42 @@ command.register({
 })
 
 command.register({
+  name: 'chicken-doc-children'
+  description: 'Pass the egg name/sequence and get children'
+  input: () ->
+    process = Process({
+      cmd: string.format("chicken-doc -c %s", howl.interact.read_text title:'Which egg?', prompt:'egg:')
+      read_stdout: true
+    })
+    rTxt = process.stdout\read_all! -- read all text
+    print('rTxt', rTxt)
+    items = {}
+    for line in string.gmatch(rTxt, "(.-)\r?\n") -- split into lines
+      table.insert(items, {
+        line
+        line: line
+      })
+    if #items == 0
+      return howl.interact.select({
+        items: {
+          'empty'
+          line: 'empty'
+        }
+        columns: {
+          {header: 'Line'}
+        }
+      })
+    return howl.interact.select({
+      :items
+      columns: {
+        {header: 'Line'}
+      }
+    })
+  handler: (ln) ->
+    print(ln.selection.line)
+})
+
+command.register({
   name: 'chicken-doc'
   description: 'Show CHICKEN documentation for current context'
   input: () ->
@@ -33,26 +69,24 @@ command.register({
     rTxt = process.stdout\read_all! -- read all text
     print('rTxt', rTxt)
     items = {}
-    for lib, proc in string.gmatch(rTxt, "%(([%w%d%-]+)%s+([%w%d%-%?]+)%)")
+    -- for lib, proc in string.gmatch(rTxt, "%(([%w%d%-]+)%s+([%w%d%-%?]+)%)")
+    for line in string.gmatch(rTxt, "%(([a-z%d%-%?%s]+)%)%s+")
       table.insert(items, {
-        lib -- useless?
-        proc -- useless?
-        lib: lib
-        proc: proc
+        line
+        line: line
       })
     return howl.interact.select({
       :items
       columns: {
-        {header: 'Egg'},
-        {header: 'Name'}
+        {header: 'Line'}
       }
     })
   handler: (ln) ->
-    title = howl.app.editor.buffer.title
-    library = ln.selection.lib
-    procedure = ln.selection.proc
+    -- library = ln.selection.lib
+    -- procedure = ln.selection.proc
     process = Process({
-      cmd: string.format("chicken-doc -i %s %s", library, procedure)
+      -- cmd: string.format("chicken-doc -i %s %s", library, procedure)
+      cmd: string.format("chicken-doc -i %s", ln.selection.line)
       read_stdout: true
     })
     rTxt = process.stdout\read_all! -- read all text
@@ -80,6 +114,7 @@ howl.mode.register mode_reg
 unload = ->
   howl.mode.unregister 'chicken'
   command.unregister 'chicken-doc'
+  command.unregister 'chicken-doc-children'
 
 return {
   info:
