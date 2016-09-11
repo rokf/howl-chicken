@@ -22,7 +22,7 @@ command.register({
     context = howl.app.editor.current_context
     sContext = {}
     print(context.prefix)
-    for item in string.gmatch(context.prefix, "[%w%.]+") -- split into words
+    for item in string.gmatch(context.prefix, "[%w%d%-%?]+") -- split into words
       table.insert(sContext, item)
     uContext = sContext[#sContext] -- get the last one
     print(uContext) -- print chosen context
@@ -33,8 +33,7 @@ command.register({
     rTxt = process.stdout\read_all! -- read all text
     print('rTxt', rTxt)
     items = {}
-    for lib, proc in string.gmatch(rTxt, "%(([%w%d%-]+)%s+([%w%d%-]+)%)") -- add - char
-      -- print('lib:',lib,'proc:',proc)
+    for lib, proc in string.gmatch(rTxt, "%(([%w%d%-]+)%s+([%w%d%-%?]+)%)")
       table.insert(items, {
         lib -- useless?
         proc -- useless?
