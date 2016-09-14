@@ -95,15 +95,6 @@ command.register({
     howl.app.editor\show_popup BufferPopup buf
 })
 
-howl.bindings.push({
-  editor:
-    ctrl_q: (editor) ->
-      if howl.app.editor.buffer.mode.name == "chicken"
-        howl.command.run 'chicken-doc'
-      else
-        howl.command.run 'show-doc-at-cursor'
-})
-
 mode_reg =
   name: 'chicken'
   extensions: { 'scm' }
