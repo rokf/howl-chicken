@@ -58,7 +58,7 @@ command.register({
     context = howl.app.editor.current_context
     sContext = {}
     print(context.prefix)
-    for item in string.gmatch(context.prefix, "[%w%d%-%?]+") -- split into words
+    for item in string.gmatch(context.prefix, "[%w%d%-%?%!]+") -- split into words
       table.insert(sContext, item)
     uContext = sContext[#sContext] -- get the last one
     print(uContext) -- print chosen context
@@ -70,7 +70,7 @@ command.register({
     print('rTxt', rTxt)
     items = {}
     -- for lib, proc in string.gmatch(rTxt, "%(([%w%d%-]+)%s+([%w%d%-%?]+)%)")
-    for line in string.gmatch(rTxt, "%(([a-z%d%-%?%s]+)%)%s+")
+    for line in string.gmatch(rTxt, "%(([a-z%d%-%?%!%s]+)%)%s+")
       table.insert(items, {
         line
         line: line
