@@ -47,7 +47,7 @@ class ChickenMode
     indentation = 0
     prev_line = line.previous_non_blank
 
-    if prev_line
+    if prev_line -- if there was something in the previous line, indent the same ammount
       indentation = prev_line.indentation
 
       start_line, col, brace, status = find_start prev_line, @auto_pairs
@@ -71,10 +71,10 @@ class ChickenMode
 
     indentation
 
-  structure: (editor) =>
+  structure: (editor) => -- which lines to show in the structure view
     buffer = editor.buffer
     lines = {}
-    patterns = {
+    patterns = { -- if it maches, it shows up under the structure
       '^%(def'
       '%s*%(ns%s'
     }
