@@ -1,20 +1,14 @@
 howl.util.lpeg_lexer ->
 
-  comment_span = (start_pat, end_pat) ->
-    start_pat * ((V'comment' + P 1) - end_pat)^0 * (end_pat + P(-1))
+  expr_span = (start_pat, end_pat) ->
+    start_pat * ((V'sexpr' + P 1) - end_pat)^0 * (end_pat + P(-1))
 
-  nested_s = capture 'comment', P {
-    'comment'
-
-    comment: any {
-      comment_span P'(',')'
-    }
+  comment = capture 'comment', any {
+    span(';', eol),
+    '#|' * scan_to('|#')^-1,
+    P('#;') * P { 'sexpr', sexpr: expr_span('(',')') }
   }
 
-  expression_comment = capture('comment', P'#;') * nested_s
-
-  comment = capture 'comment', span(';', eol)
-  block_comment = capture 'comment', '#|' * scan_to('|#')^-1
   operator = capture 'operator', S'/.%^#,(){}[]'
   dq_string = capture 'string', span('"', '"', P'\\')
   number = capture 'number', digit^1 * alpha^-1
@@ -25,7 +19,6 @@ howl.util.lpeg_lexer ->
 
   dorc = any { delimiter, P':' }
 
-  -- name = complement(delimiter)^1
   name = complement(dorc)^1
 
   identifier = capture 'identifier', name
@@ -47,9 +40,7 @@ howl.util.lpeg_lexer ->
   any {
     dq_string,
     comment,
-    block_comment,
     foreign_declare,
-    expression_comment,
     number,
     fcall,
     keyword,
