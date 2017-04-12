@@ -1,99 +1,56 @@
--- built uppon the Lisp bundle
+-- built upon the Lisp bundle
 
 import command from howl
-import config from howl
-import Process from howl.io -- to run external commands
-import BufferPopup from howl.ui -- for docs
-import execute from howl.io.Process
+import Process from howl.io
+import BufferPopup from howl.ui
 
-command.register({
+command.register {
   name: 'csc'
-  description: "CHICKEN compiler"
-  input: () ->
-    howl.app.editor.buffer.file
-  handler: (filename) ->
-    howl.command.run(string.format("project-exec csc %s", filename))
-})
+  description: "Run csc"
+  input: () -> howl.app.editor.buffer.file
+  handler: (filename) -> howl.command.run("project-exec csc #{filename}")
+}
 
-command.register({
+command.register {
   name: 'chicken-doc-children'
   description: 'Pass the egg name/sequence and get children'
   input: () ->
-    process = Process({
-      cmd: string.format("chicken-doc -c %s", howl.interact.read_text title:'Which egg?', prompt:'egg:')
+    process = Process {
+      cmd: "chicken-doc -c #{howl.interact.read_text(title:'Which egg?', prompt:'egg:')}"
       read_stdout: true
-    })
-    rTxt = process.stdout\read_all! -- read all text
-    print('rTxt', rTxt)
-    items = {}
-    for line in string.gmatch(rTxt, "(.-)\r?\n") -- split into lines
-      table.insert(items, {
-        line
-        line: line
-      })
+    }
+    received_txt = process.stdout\read_all!
+    items = [{:line, line} for line in string.gmatch(received_txt, "(.-)\r?\n")]
     if #items == 0
-      return howl.interact.select({
-        items: {
-          'empty'
-          line: 'empty'
-        }
-        columns: {
-          {header: 'Line'}
-        }
-      })
-    return howl.interact.select({
-      :items
-      columns: {
-        {header: 'Line'}
+      return howl.interact.select {
+        items: { 'empty', line: 'empty' }
+        columns: { {header: 'Line'} }
       }
-    })
-  handler: (ln) ->
-    print(ln.selection.line)
-})
+    return howl.interact.select {
+      :items
+      columns: { {header: 'Line'} }
+    }
+  handler: (ln) -> print ln.selection.line
+}
 
-command.register({
+command.register {
   name: 'chicken-doc'
-  description: 'Show CHICKEN documentation for current context'
+  description: 'Show documentation for the current context'
   input: () ->
     context = howl.app.editor.current_context
-    sContext = {}
-    print(context.prefix)
-    for item in string.gmatch(context.prefix, "[%w%d%-%?%!]+") -- split into words
-      table.insert(sContext, item)
-    uContext = sContext[#sContext] -- get the last one
-    print(uContext) -- print chosen context
-    process = Process({
-      cmd: string.format("chicken-doc -f %s", uContext)
-      read_stdout: true
-    })
-    rTxt = process.stdout\read_all! -- read all text
-    print('rTxt', rTxt)
-    items = {}
-    -- for lib, proc in string.gmatch(rTxt, "%(([%w%d%-]+)%s+([%w%d%-%?]+)%)")
-    for line in string.gmatch(rTxt, "%(([a-z%d%-%?%!%s]+)%)%s+")
-      table.insert(items, {
-        line
-        line: line
-      })
-    return howl.interact.select({
-      :items
-      columns: {
-        {header: 'Line'}
-      }
-    })
+    sContext = [item for item in string.gmatch(context.prefix, "[%w%d%-%?%!]+")]
+    uContext = sContext[#sContext]
+    process = Process { cmd: "chicken-doc -f #{uContext}",  read_stdout: true }
+    received_txt = process.stdout\read_all!
+    items = [{:line,line} for line in string.gmatch(received_txt, "%(([a-z%d%-%?%!%s]+)%)%s+")]
+    return howl.interact.select { :items, columns: { {header: 'Line'} } }
   handler: (ln) ->
-    -- library = ln.selection.lib
-    -- procedure = ln.selection.proc
-    process = Process({
-      -- cmd: string.format("chicken-doc -i %s %s", library, procedure)
-      cmd: string.format("chicken-doc -i %s", ln.selection.line)
-      read_stdout: true
-    })
-    rTxt = process.stdout\read_all! -- read all text
-    buf = howl.Buffer howl.mode.by_name('default') -- do popup
-    buf.text = rTxt
+    process = Process { cmd: "chicken-doc -i #{ln.selection.line}", read_stdout: true }
+    received_txt = process.stdout\read_all!
+    buf = howl.Buffer howl.mode.by_name('default')
+    buf.text = received_txt
     howl.app.editor\show_popup BufferPopup buf
-})
+}
 
 mode_reg =
   name: 'chicken'

@@ -50,7 +50,7 @@ class ChickenMode
     if prev_line -- if there was something in the previous line, indent the same ammount
       indentation = prev_line.indentation
 
-      start_line, col, brace, status = find_start prev_line, @auto_pairs
+      start_line, col, brace, status = find_start(prev_line, @auto_pairs)
       if start_line
         if status == 'even'
           indentation = col - 1
@@ -75,7 +75,7 @@ class ChickenMode
     buffer = editor.buffer
     lines = {}
     patterns = { -- if it maches, it shows up under the structure
-      '^%(def'
+      '^%s*%(define'
       '%s*%(ns%s'
     }
 

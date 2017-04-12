@@ -19,6 +19,8 @@ howl.util.lpeg_lexer ->
 
   name = complement(dorc)^1
   identifier = capture 'identifier', name
+
+  -- scheme keyword
   keyword = capture 'constant', any {
     P':' * name, --  * P':'^0
     P'#:' * name,
@@ -27,11 +29,12 @@ howl.util.lpeg_lexer ->
 
   fcall = sequence {
     '(',
-    capture 'function', complement(delimiter)^1
+    capture 'variable', complement(delimiter)^1
   }
 
   -- span("#!" * (blank^1 + S("\\")), eol), -- bang
   -- P('#!') * ('optional' + 'rest' + 'key' + 'eof'),
+
   specials = capture 'special', any {
     word({ '#t', '#f' }) * #delimiter^1, -- booleans
     word({ '#cs', '#ci' }) * #delimiter^1, -- case sensitivity
