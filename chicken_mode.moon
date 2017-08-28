@@ -1,6 +1,3 @@
-
-append = table.insert
-
 find_start = (line, opening) ->
   closing = {v, k for k, v in pairs opening}
   stack = {}
@@ -82,7 +79,7 @@ class ChickenMode
     for line in *buffer.lines
       for pattern in *patterns
         if line\match pattern
-          append lines, line
+          table.insert lines, line
           break
 
     lines

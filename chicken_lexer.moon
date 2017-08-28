@@ -5,49 +5,52 @@ howl.util.lpeg_lexer ->
 
   comment = capture 'comment', any {
     span(';', eol),
-    '#|' * scan_to('|#')^-1,
-    P('#;') * P { 'sexpr', sexpr: expr_span('(',')') },
+    P'#|' * scan_to '|#',
+    P'#;' * P { 'sexpr', sexpr: expr_span('(',')') },
     span('#!' * (blank^1 + '\\'),eol)
   }
 
-  dq_string = capture 'string', span('"', '"', P'\\')
-  number = capture 'number', digit^1 * alpha^-1
+  delimiter = any { space, P'\n', S'()[]' }
+  -- delimiter = any { space, S'/.,(){}[]^#' }
 
-  delimiter = any { space, S'/.,(){}[]^#' }
+  strings = capture 'string', any {
+    span('"', '"', P'\\')
+    P'#\\' * (1 - delimiter) -- character
+  }
+
+  number = capture 'number', any {
+    P('-')^-1 * digit^1 -- decimal
+    P'#' * S'Bb' * S'01'^1 -- binary
+    P'#' * S'Oo' * R('07')^1 -- octal
+    P'#' * S'Xx' * R('AF','af','09')^1 -- hexadecimal
+    P('-')^-1 * digit^1 * P'.' * digit^1 * (S'eE' * P('-')^-1 * digit^1)^-1
+    P('-')^-1 * digit^1 * P'/' * P('-')^-1 * digit^1 -- rational
+  }
+
 
   dorc = any { delimiter, P':' }
 
   name = complement(dorc)^1
   identifier = capture 'identifier', name
 
-  -- scheme keyword
   keyword = capture 'constant', any {
-    P':' * name, --  * P':'^0
+    P':' * name,
     P'#:' * name,
     name * P':'
   }
 
-  fcall = sequence {
-    '(',
-    capture 'variable', complement(delimiter)^1
-  }
-
-  -- span("#!" * (blank^1 + S("\\")), eol), -- bang
-  -- P('#!') * ('optional' + 'rest' + 'key' + 'eof'),
-
   specials = capture 'special', any {
-    word({ '#t', '#f' }) * #delimiter^1, -- booleans
-    word({ '#cs', '#ci' }) * #delimiter^1, -- case sensitivity
-    S('\'') * name,
-    line_start * '#>' * scan_to('<#')^-1 -- foreign_declare
+    word { '#t', '#f' }
+    word { '#cs', '#ci' }
+    S('\'') * name
+    line_start * '#>' * scan_to('<#')
   }
 
   any {
-    dq_string,
+    strings,
     comment,
     number,
-    fcall,
     keyword,
     specials,
-    identifier,
+    identifier
   }
