@@ -1,4 +1,4 @@
-#### CHICKEN Scheme bundle for Howl
+<p align="center"><img width="200" src="img.png"></p>
 
 ```
 cd ~/.howl/bundles

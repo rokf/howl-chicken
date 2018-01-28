@@ -43,6 +43,7 @@ command.register {
     process = Process { cmd: "chicken-doc -f #{uContext}",  read_stdout: true }
     received_txt = process.stdout\read_all!
     items = [{:line,line} for line in string.gmatch(received_txt, "%(([a-z%d%-%?%!%s]+)%)%s+")]
+    if #items == 1 then return { selection: { line: items[1].line } }
     return howl.interact.select { :items, columns: { {header: 'Line'} } }
   handler: (ln) ->
     process = Process { cmd: "chicken-doc -i #{ln.selection.line}", read_stdout: true }
