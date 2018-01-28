@@ -5,17 +5,22 @@ cd ~/.howl/bundles
 git clone https://github.com/rokf/howl-chicken
 ```
 
-You need `chicken-doc` installed for the docs feature to work.
+The bundle contains a lexer, because *CHICKEN* has some minor syntax additions (compared to other Scheme
+implementations).
 
-In your `init.lua` file you'll have to overwrite the `ctrl_q` binding.
+This bundle provides autocomplete and inline documentation features,
+which depend on `chicken-doc`.
+Go to http://wiki.call-cc.org/eggref/4/chicken-doc for installation instructions.
+
+You have to overwrite the `ctrl_q` key binding
+(or whatever you have set for docs to show up)
+for the documentation feature.
 
 ```
 howl.bindings.push {
   editor = {
     ctrl_q = function (editor)
-      if howl.app.editor.buffer.mode.name == "elm" then
-        howl.command.run('elm-doc')
-      elseif howl.app.editor.buffer.mode.name == "chicken" then
+      if howl.app.editor.buffer.mode.name == "chicken" then
         howl.command.run('chicken-doc')
       else
         howl.command.run('show-doc-at-cursor')
@@ -27,3 +32,9 @@ howl.bindings.push {
 
 This example also shows why this has to be done. If you'd have multiple bundles changing the binding,
 they would overwrite and only one binding would work at time (the last loaded/reloaded one).
+
+Some code is copied from the `Lisp` bundle
+contained within the `Howl` source.
+It was written by *Nils Nordman* and is licensed under the **MIT** license.
+
+Everything else (the stuff I've written) is also **MIT** licensed.

@@ -27,11 +27,13 @@ find_start = (line, opening) ->
 class ChickenMode
   new: =>
     @lexer = bundle_load('chicken_lexer')
+    @completers = { 'chicken_completer', 'in_buffer' }
 
   comment_syntax: ';'
 
   default_config:
     word_pattern: '[^][%s/.(){}"\']+'
+    complete: 'manual'
 
   auto_pairs: {
     '(': ')'

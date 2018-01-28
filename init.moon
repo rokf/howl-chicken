@@ -33,6 +33,18 @@ command.register {
   handler: (ln) -> print ln.selection.line
 }
 
+-- autocomplete with chicken-doc -m ctx
+class ChickenCompleter
+  complete: (ctx) =>
+    print ctx.word
+    process = Process cmd: "chicken-doc -m #{ctx.word}", read_stdout: true
+    process\wait!
+    if process.successful
+      return [id for _,id in string.gmatch process.stdout\read_all!, "%(([a-z%d%-%?%!]+)%s+([a-z%d%-%?%!]+)%)%s+" ]
+    else return {}
+
+howl.completion.register name: 'chicken_completer', factory: ChickenCompleter
+
 command.register {
   name: 'chicken-doc'
   description: 'Show documentation for the current context'
@@ -64,6 +76,7 @@ unload = ->
   howl.mode.unregister 'chicken'
   command.unregister 'chicken-doc'
   command.unregister 'chicken-doc-children'
+  howl.completion.unregister 'chicken_completer'
 
 return {
   info:
