@@ -13,24 +13,29 @@ command.register {
 
 command.register {
   name: 'chicken-doc-children'
-  description: 'Pass the egg name/sequence and get children'
+  description: 'Get the contents of an egg or unit'
   input: () ->
+    egg = howl.interact.read_text(title:'Which egg/unit?')
     process = Process {
-      cmd: "chicken-doc -c #{howl.interact.read_text(title:'Which egg?', prompt:'egg:')}"
+      cmd: "chicken-doc -c #{egg}"
       read_stdout: true
     }
-    received_txt = process.stdout\read_all!
-    items = [{:line, line} for line in string.gmatch(received_txt, "(.-)\r?\n")]
-    if #items == 0
-      return howl.interact.select {
-        items: { 'empty', line: 'empty' }
-        columns: { {header: 'Line'} }
-      }
+    rtxt = process.stdout\read_all!
+    items = [{identifier, usage, :egg} for identifier,usage in string.gmatch(rtxt, "([^%s]+)%s+([^\n\r]+)\r?\n")]
+    if #items == 0 then return {} -- nothing there
     return howl.interact.select {
       :items
-      columns: { {header: 'Line'} }
+      columns: {
+        {header: 'Identifier', style:'bold'}
+        {header: 'Usage'}
+      }
     }
-  handler: (ln) -> print ln.selection.line
+  handler: (s) ->
+    if s.selection == nil then return {}
+    process = Process { cmd: "chicken-doc -i #{s.selection.egg} #{s.selection[1]}", read_stdout: true }
+    buf = howl.Buffer howl.mode.by_name('default')
+    buf.text = process.stdout\read_all!
+    howl.app.editor\show_popup BufferPopup(buf), { position: 1 }
 }
 
 -- autocomplete with chicken-doc -m ctx
@@ -40,7 +45,7 @@ class ChickenCompleter
     process = Process cmd: "chicken-doc -m #{ctx.word}", read_stdout: true
     process\wait!
     if process.successful
-      return [id for _,id in string.gmatch process.stdout\read_all!, "%(([a-z%d%-%?%!]+)%s+([a-z%d%-%?%!]+)%)%s+" ]
+      return [id for id in string.gmatch process.stdout\read_all!, "%([a-z%d%-%?%!]+%s+([a-z%d%-%?%!]+)%)%s+" ]
     else return {}
 
 howl.completion.register name: 'chicken_completer', factory: ChickenCompleter

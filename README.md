@@ -12,6 +12,10 @@ This bundle provides autocomplete and inline documentation features,
 which depend on `chicken-doc`.
 Go to http://wiki.call-cc.org/eggref/4/chicken-doc for installation instructions.
 
+There is a also a `chicken-doc-children` command which offers a selection
+between identifiers contained in an egg or unit. On the selection
+of an identifier its description is displayed.
+
 You have to overwrite the `ctrl_q` key binding
 (or whatever you have set for docs to show up)
 for the documentation feature.
