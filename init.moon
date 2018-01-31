@@ -32,7 +32,10 @@ command.register {
     }
   handler: (s) ->
     if s.selection == nil then return {}
-    process = Process { cmd: "chicken-doc -i #{s.selection.egg} #{s.selection[1]}", read_stdout: true }
+    process = Process {
+      cmd: "chicken-doc -i #{s.selection.egg} #{s.selection[1]}"
+      read_stdout: true
+    }
     buf = howl.Buffer howl.mode.by_name('default')
     buf.text = process.stdout\read_all!
     howl.app.editor\show_popup BufferPopup(buf), { position: 1 }
@@ -54,20 +57,17 @@ command.register {
   name: 'chicken-doc'
   description: 'Show documentation for the current context'
   input: () ->
-    context = howl.app.editor.current_context
-    sContext = [item for item in string.gmatch(context.prefix, "[%w%d%-%?%!]+")]
-    uContext = sContext[#sContext]
-    process = Process { cmd: "chicken-doc -f #{uContext}",  read_stdout: true }
-    received_txt = process.stdout\read_all!
-    items = [{:line,line} for line in string.gmatch(received_txt, "%(([a-z%d%-%?%!%s]+)%)%s+")]
-    if #items == 1 then return { selection: { line: items[1].line } }
+    process = Process { cmd: "chicken-doc -f #{howl.app.editor.current_context.word}",  read_stdout: true }
+    items = [line for line in string.gmatch(process.stdout\read_all!, "%(([a-z%d%-%?%!%s]+)%)%s+")]
+    if #items == 0 then return nil
+    if #items == 1 then return { selection: items[1] }
     return howl.interact.select { :items, columns: { {header: 'Line'} } }
   handler: (ln) ->
-    process = Process { cmd: "chicken-doc -i #{ln.selection.line}", read_stdout: true }
-    received_txt = process.stdout\read_all!
+    if ln == nil then return nil
+    process = Process { cmd: "chicken-doc -i #{ln.selection}", read_stdout: true }
     buf = howl.Buffer howl.mode.by_name('default')
-    buf.text = received_txt
-    howl.app.editor\show_popup BufferPopup buf
+    buf.text = process.stdout\read_all!
+    howl.app.editor\show_popup BufferPopup(buf), { position:1 }
 }
 
 mode_reg =
