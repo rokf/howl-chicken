@@ -7,14 +7,14 @@ howl.util.lpeg_lexer ->
     span(';', eol),
     P'#|' * scan_to '|#',
     P'#;' * P { 'sexpr', sexpr: expr_span('(',')') },
-    span('#!' * (blank^1 + '\\'),eol)
+    span('#!' * (blank^1 + '\\'), eol)
   }
 
   delimiter = any { space, P'\n', S'()[]' }
   -- delimiter = any { space, S'/.,(){}[]^#' }
 
   strings = capture 'string', any {
-    span('"', '"', P'\\')
+    span '"', '"'
     P'#\\' * (1 - delimiter) -- character
   }
 
@@ -26,7 +26,6 @@ howl.util.lpeg_lexer ->
     P('-')^-1 * digit^1 * P'.' * digit^1 * (S'eE' * P('-')^-1 * digit^1)^-1
     P('-')^-1 * digit^1 * P'/' * P('-')^-1 * digit^1 -- rational
   }
-
 
   dorc = any { delimiter, P':' }
 
