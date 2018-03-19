@@ -18,7 +18,7 @@ howl.util.lpeg_lexer ->
   string = capture 'string', span '"', '"'
 
   number = capture 'number', word {
-    P('-')^-1 * digit^1 * P'/' * P('-')^-1 * digit^1 -- rational
+    digit^1 * P'/' * digit^1 -- rational
     P('-')^-1 * digit^1 * P'.' * digit^1 * (S'eE' * P('-')^-1 * digit^1)^-1 -- floating
     P('-')^-1 * digit^1 -- decimal
     P'#' * S'Bb' * S'01'^1 -- binary

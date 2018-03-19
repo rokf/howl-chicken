@@ -1,8 +1,27 @@
 -- built upon the Lisp bundle
 
-import command, activities from howl
+import command, activities, app, mode from howl
 import Process from howl.io
 import BufferPopup from howl.ui
+
+command.register
+  name: 'csi-pretty-eval'
+  description: "Run csi -P on selected expression"
+  handler: ->
+    s_text = app.editor.selection.text
+    success, pco = pcall Process.open_pipe, {'csi', '-P', s_text}
+    if not success
+      log.error pco
+      return
+    stdout, stderr = activities.run_process { title: 'running csi -P on selection' }, pco
+    txt = ""
+    if #stdout ~= 0
+      txt = stdout
+    else
+      txt = stderr
+    buf = howl.Buffer mode.by_name 'default'
+    buf.text = txt
+    app.editor\show_popup BufferPopup buf
 
 command.register {
   name: 'csc'
@@ -42,7 +61,7 @@ command.register {
     }
     if successful
       stdout, _ = activities.run_process { title: 'getting details of the selected child' }, process
-      buf = howl.Buffer howl.mode.by_name('default')
+      buf = howl.Buffer mode.by_name 'default'
       buf.text = stdout
       howl.app.editor\show_popup BufferPopup(buf), { position: 1 }
 }
@@ -88,7 +107,7 @@ command.register {
     if successful
       stdout, _ = activities.run_process { title: 'fetching docs for selected element in package' }, process
       if #stdout > 0
-        buf = howl.Buffer howl.mode.by_name('default')
+        buf = howl.Buffer mode.by_name 'default'
         buf.text = stdout
         howl.app.editor\show_popup BufferPopup(buf), { position:1 }
       else
@@ -100,12 +119,13 @@ mode_reg =
   extensions: { 'scm' }
   create: -> bundle_load('chicken_mode')!
 
-howl.mode.register mode_reg
+mode.register mode_reg
 
 unload = ->
-  howl.mode.unregister 'chicken'
+  mode.unregister 'chicken'
   command.unregister 'chicken-doc'
   command.unregister 'chicken-doc-children'
+  command.unregister 'csi-pretty-eval'
   howl.completion.unregister 'chicken_completer'
 
 return {
