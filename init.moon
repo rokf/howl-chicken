@@ -25,9 +25,15 @@ command.register
 
 command.register {
   name: 'csc'
-  description: "Run csc"
-  input: () -> howl.app.editor.buffer.file
-  handler: (filename) -> howl.command.run("project-exec csc #{filename}")
+  description: "Compile file with csc"
+  handler: ->
+    filename = howl.app.editor.buffer.file
+    if not filename then return
+    proj = howl.Project.for_file(filename)
+    if not proj
+      log.warn 'needs a project'
+      return
+    howl.command.run("project-exec csc #{filename}")
 }
 
 command.register {
