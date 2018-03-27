@@ -1,8 +1,8 @@
 -- built upon the Lisp bundle
 
-import command, activities, app, mode from howl
-import Process from howl.io
-import BufferPopup from howl.ui
+{:command, :activities, :app, :mode} = howl
+{:Process} = howl.io
+{:BufferPopup} = howl.ui
 
 command.register
   name: 'csi-pretty-eval'
@@ -87,39 +87,6 @@ class ChickenCompleter
 
 howl.completion.register name: 'chicken_completer', factory: ChickenCompleter
 
-command.register {
-  name: 'chicken-doc'
-  description: 'Show documentation for the current context'
-  input: () ->
-    successful, process = pcall Process, {
-      cmd: "chicken-doc -f #{howl.app.editor.current_context.word}"
-      read_stdout: true
-      read_stderr: true
-    }
-    items = {}
-    if successful
-      stdout, _ = activities.run_process { title: 'fetching docs with chicken-doc' }, process
-      items = [line for line in string.gmatch stdout, "%(([a-z%d%-%?%!%s]+)%)%s+"]
-    if #items == 0 then return nil
-    if #items == 1 then return { selection: items[1] }
-    return howl.interact.select { :items, columns: { {header: 'Line'} } }
-  handler: (ln) ->
-    if ln == nil then return nil
-    successful, process = pcall Process, {
-      cmd: "chicken-doc -i #{ln.selection}"
-      read_stdout: true
-      read_stderr: true
-    }
-    if successful
-      stdout, _ = activities.run_process { title: 'fetching docs for selected element in package' }, process
-      if #stdout > 0
-        buf = howl.Buffer mode.by_name 'default'
-        buf.text = stdout
-        howl.app.editor\show_popup BufferPopup(buf), { position:1 }
-      else
-        log.info "the element has no docs"
-}
-
 mode_reg =
   name: 'chicken'
   extensions: { 'scm' }
@@ -129,9 +96,9 @@ mode.register mode_reg
 
 unload = ->
   mode.unregister 'chicken'
-  command.unregister 'chicken-doc'
   command.unregister 'chicken-doc-children'
   command.unregister 'csi-pretty-eval'
+  command.unregister 'csc'
   howl.completion.unregister 'chicken_completer'
 
 return {
