@@ -33,9 +33,9 @@ class ChickenMode
     @completers = { 'chicken_completer', 'in_buffer' }
 
   comment_syntax: ';'
+  word_pattern: '[^][%s/.(){}"\']+'
 
   default_config:
-    word_pattern: '[^][%s/.(){}"\']+'
     complete: 'manual'
 
   auto_pairs: {
