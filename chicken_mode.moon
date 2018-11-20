@@ -6,18 +6,8 @@ class ChickenMode
     @lexer = bundle_load('chicken_lexer')
     @completers = { 'chicken_completer', 'in_buffer' }
 
-  comment_syntax: ';'
-  word_pattern: '[^][%s/.(){}"\']+'
-
   default_config:
     complete: 'manual'
-
-  auto_pairs: {
-    '(': ')'
-    '[': ']'
-    '{': '}'
-    '"': '"'
-  }
 
   show_doc: (editor) =>
     unless sys.find_executable 'chicken-doc'
@@ -52,14 +42,13 @@ class ChickenMode
       return buf
 
   structure: (editor) => -- which lines to show in the structure view
-    buffer = editor.buffer
     lines = {}
     patterns = { -- if it maches, it shows up under the structure
       '^%s*%(define'
       '^%s*%(ns%s'
     }
 
-    for line in *buffer.lines
+    for line in *editor.buffer.lines
       for pattern in *patterns
         if line\match pattern
           table.insert lines, line
