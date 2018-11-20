@@ -87,12 +87,11 @@ class ChickenCompleter
 
 howl.completion.register name: 'chicken_completer', factory: ChickenCompleter
 
-mode_reg =
+mode.register
   name: 'chicken'
   extensions: { 'scm' }
   create: -> bundle_load('chicken_mode')!
-
-mode.register mode_reg
+  parent: 'lisp'
 
 unload = ->
   mode.unregister 'chicken'
