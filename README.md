@@ -10,7 +10,7 @@ git clone https://github.com/rokf/howl-chicken
 #### Dependencies
 
 This bundle provides autocomplete and inline documentation features, which depend on `chicken-doc`.
-Go to http://wiki.call-cc.org/eggref/4/chicken-doc for installation instructions.
+Go to http://wiki.call-cc.org/eggref/5/chicken-doc for installation instructions.
 
 #### Commands
 
